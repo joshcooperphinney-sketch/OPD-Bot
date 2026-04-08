@@ -58,6 +58,73 @@ client.once(Events.ClientReady, () => {
   console.log(`Logged in as ${client.user.tag}`);
 });
 
+async function closePoll(message) {
+  try {
+    await message.fetch();
+
+    if (!message.embeds.length) return;
+    const embed = message.embeds[0];
+    if (embed.title !== 'HR Poll') return;
+
+    const upvote = message.reactions.cache.get('1452928682791534756');
+    const downvote = message.reactions.cache.get('1452928734880596028');
+
+    const upCount = upvote ? upvote.count - 1 : 0;
+    const downCount = downvote ? downvote.count - 1 : 0;
+
+    let resultText = 'Tie';
+    if (upCount > downCount) resultText = 'Passed';
+    if (downCount > upCount) resultText = 'Rejected';
+
+    const closedEmbed = new EmbedBuilder()
+      .setTitle('HR Poll — Closed')
+      .setColor('#2B2D31')
+      .addFields(
+        embed.fields[0], // Topic
+        embed.fields[1], // Duration
+        embed.fields[2], // Ends
+        {
+          name: 'Final Results',
+          value: `<:opd_checkmark:1452928682791534756> In Agreement: **${upCount}**\n<:opd_red_ex:1452928734880596028> Against: **${downCount}**`
+        },
+        {
+          name: 'Outcome',
+          value: `**${resultText}**`
+        }
+      )
+      .setFooter({ text: embed.footer?.text || 'Poll closed' })
+      .setTimestamp();
+
+    await message.edit({ content: '🔒 This HR poll is now closed.', embeds: [closedEmbed] });
+
+    try {
+      await message.reactions.removeAll();
+    } catch (err) {
+      console.error('Failed to remove reactions:', err);
+    }
+
+    await message.channel.send({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle('HR Poll Results')
+          .setColor('#112152')
+          .addFields(
+            { name: 'Topic', value: embed.fields[0].value },
+            {
+              name: 'Results',
+              value: `<:opd_checkmark:1452928682791534756> In Agreement: **${upCount}**\n<:opd_red_ex:1452928734880596028> Against: **${downCount}**`
+            },
+            { name: 'Outcome', value: `**${resultText}**` }
+          )
+          .setTimestamp()
+      ]
+    });
+
+  } catch (error) {
+    console.error('Closing poll failed:', error);
+  }
+}
+
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return;
   await logCommand(interaction);
@@ -80,16 +147,23 @@ client.on(Events.InteractionCreate, async interaction => {
     const currentCase = caseNumber++;
 
     const embed = new EmbedBuilder()
-      .setTitle('Ocala Police Office Infraction')
+      .setAuthor({
+        name: `${user.tag}`,
+        iconURL: user.displayAvatarURL()
+      })
+      .setTitle('Officer Infraction')
       .setColor('#112152')
       .addFields(
-        { name: 'Case Number', value: `#${currentCase}`, inline: true },
-        { name: 'Officer', value: `${user}`, inline: true },
-        { name: 'Type', value: type, inline: true },
-        { name: 'Issued By', value: `${interaction.user}`, inline: true },
-        { name: 'Reason', value: reason },
-        { name: 'Notes', value: notes }
+        { name: 'Case', value: `${currentCase}`, inline: true },
+        { name: 'Infraction', value: type, inline: true },
+        { name: 'Date', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: true },
+        { name: 'Reason', value: reason, inline: true },
+        { name: 'Notes', value: notes, inline: true }
       )
+      .setFooter({
+        text: `Issued by: ${interaction.user.tag}`,
+        iconURL: interaction.user.displayAvatarURL()
+      })
       .setTimestamp();
 
     const channel = await client.channels.fetch(INFRACTION_CHANNEL_ID);
@@ -148,6 +222,10 @@ client.on(Events.InteractionCreate, async interaction => {
     // 👍👎 reactions
     await message.react('<:opd_checkmark:1452928682791534756>');
     await message.react('<:opd_red_ex:1452928734880596028>');
+
+    setTimeout(async () => {
+      await closePoll(message);
+    }, time * 60 * 60 * 1000);
 
     await interaction.reply({
       content: 'Poll created successfully.',
