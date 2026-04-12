@@ -17,6 +17,7 @@ const client = new Client({
 
 let caseNumber = 1;
 
+const DEPT_ADVISOR_ROLE_ID = '1444915293489991815';
 const DEPT_COMMAND_ROLE_ID = '1443475886018924565';
 const FIELD_COMMAND_ROLE_ID = '1446749008105181273';
 const HR_POLLS_THREAD_ID = '1485861154189344900';
@@ -26,6 +27,11 @@ const ALLOWED_ROLE_IDS = [
   '1444234547452444762', // Internal Affairs
 ];
 const INFRACTION_CHANNEL_ID = '1443446307661545513';
+const POLL_ALLOWED_ROLE_IDS = [
+  FIELD_COMMAND_ROLE_ID,
+  DEPT_COMMAND_ROLE_ID,
+  DEPT_ADVISOR_ROLE_ID
+];
 
 async function logCommand(interaction) {
   try {
@@ -36,11 +42,12 @@ async function logCommand(interaction) {
       return `**${opt.name}:** ${opt.value}`;
     }).join('\n') || 'None';
 
+    // Action Logging Embed
     const logEmbed = new EmbedBuilder()
       .setTitle('Command Executed')
-      .setColor('#5865F2') // Discord blurple
+      .setColor('#112152') 
       .addFields(
-        { name: 'User', value: `${interaction.user.tag}`, inline: true },
+        { name: 'User', value: `${interaction.user}`, inline: true },
         { name: 'Command', value: `/${interaction.commandName}`, inline: true },
         { name: 'Channel', value: `${interaction.channel}`, inline: true },
         { name: 'Arguments', value: options }
@@ -78,7 +85,7 @@ async function closePoll(message) {
 
     const closedEmbed = new EmbedBuilder()
       .setTitle('HR Poll — Closed')
-      .setColor('#2B2D31')
+      .setColor('#112152')
       .addFields(
         embed.fields[0], // Topic
         embed.fields[1], // Duration
@@ -181,6 +188,12 @@ client.on(Events.InteractionCreate, async interaction => {
 
   // 🔵 COMMAND 2 — START POLL
   if (interaction.commandName === 'startpoll') {
+    if (!POLL_ALLOWED_ROLE_IDS.some(roleId => interaction.member.roles.cache.has(roleId))) {
+  return interaction.reply({
+    content: 'You do not have permission to start HR polls.',
+    ephemeral: true
+  });
+}
 
     const topic = interaction.options.getString('topic');
     const time = interaction.options.getInteger('time');
@@ -211,10 +224,10 @@ client.on(Events.InteractionCreate, async interaction => {
     // 📍 Send to thread
     const thread = await client.channels.fetch(HR_POLLS_THREAD_ID);
     const message = await thread.send({
-     content: `<@&${DEPT_COMMAND_ROLE_ID}> <@&${FIELD_COMMAND_ROLE_ID}>`,
+     content: `<@&${DEPT_COMMAND_ROLE_ID}> <@&${FIELD_COMMAND_ROLE_ID}> <@&${DEPT_ADVISOR_ROLE_ID}>`,
      embeds: [embed],
      allowedMentions: {
-    roles: [DEPT_COMMAND_ROLE_ID, FIELD_COMMAND_ROLE_ID]
+    roles: [DEPT_COMMAND_ROLE_ID, FIELD_COMMAND_ROLE_ID, DEPT_ADVISOR_ROLE_ID]
     }
     });
     message.isPoll = true;
