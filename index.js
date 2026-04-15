@@ -253,7 +253,6 @@ client.on(Events.InteractionCreate, async interaction => {
       ephemeral: true
     });
   }
-});
 
  // 🔴 COMMAND 3 — SAU REQUEST
  if (interaction.commandName === 'sau-request') {
@@ -294,7 +293,8 @@ client.on(Events.InteractionCreate, async interaction => {
     content: 'SAU request sent successfully.',
     ephemeral: true
   });
-}
+ }
+});
 
 async function updatePollEmbed(message) {
   try {
