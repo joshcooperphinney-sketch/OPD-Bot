@@ -17,6 +17,8 @@ const client = new Client({
 
 let caseNumber = 1;
 
+const INTELLIGENCE_DIVISION_ROLE_ID = '1445699831317135461';
+const SAU_ASSIGNMENTS_CHANNEL_ID = '1486788196980490261';
 const DEPT_ADVISOR_ROLE_ID = '1444915293489991815';
 const DEPT_COMMAND_ROLE_ID = '1443475886018924565';
 const FIELD_COMMAND_ROLE_ID = '1446749008105181273';
@@ -148,6 +150,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
     const user = interaction.options.getUser('user');
     const type = interaction.options.getString('type');
+    const subdivision = interaction.options.getString('subdivision');
     const reason = interaction.options.getString('reason');
     const notes = interaction.options.getString('notes') || 'None';
 
@@ -164,6 +167,11 @@ client.on(Events.InteractionCreate, async interaction => {
         { name: 'Case', value: `${currentCase}`, inline: true },
         { name: 'Infraction', value: type, inline: true },
         { name: 'Date', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: true },
+        {
+          name: 'Division',
+          value: subdivision || 'N/A',
+          inline: true
+        },
         { name: 'Reason', value: reason, inline: true },
         { name: 'Notes', value: notes, inline: true }
       )
@@ -246,6 +254,47 @@ client.on(Events.InteractionCreate, async interaction => {
     });
   }
 });
+
+ // 🔴 COMMAND 3 — SAU REQUEST
+ if (interaction.commandName === 'sau-request') {
+
+  if (!interaction.member.roles.cache.has(INTELLIGENCE_DIVISION_ROLE_ID)) {
+    return interaction.reply({
+      content: 'You do not have permission to use this command.',
+      ephemeral: true
+    });
+  }
+
+  const location = interaction.options.getString('location');
+  const time = interaction.options.getString('time');
+  const caseLink = interaction.options.getString('case_link');
+  const operationType = interaction.options.getString('operation_type');
+  const notes = interaction.options.getString('notes') || 'None';
+
+  const embed = new EmbedBuilder()
+    .setTitle('SAU Operation Request')
+    .setColor('#112152')
+    .addFields(
+      { name: 'Operation Type', value: operationType, inline: true },
+      { name: 'Location', value: location, inline: true },
+      { name: 'Time of Occurrence', value: time, inline: true },
+      { name: 'Case File', value: `[Open Case File](${caseLink})` },
+      { name: 'Additional Notes', value: notes }
+    )
+    .setFooter({
+      text: `Requested by ${interaction.user.tag}`,
+      iconURL: interaction.user.displayAvatarURL()
+    })
+    .setTimestamp();
+
+  const channel = await client.channels.fetch(SAU_ASSIGNMENTS_CHANNEL_ID);
+  await channel.send({ embeds: [embed] });
+
+  await interaction.reply({
+    content: 'SAU request sent successfully.',
+    ephemeral: true
+  });
+}
 
 async function updatePollEmbed(message) {
   try {

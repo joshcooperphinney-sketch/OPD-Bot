@@ -1,7 +1,8 @@
 const { REST, Routes, SlashCommandBuilder } = require('discord.js');
 require('dotenv').config();
+
 const commands = [
-  new SlashCommandBuilder()
+  new SlashCommandBuilder() // ISSUE INFRACTION
     .setName('issueinfraction')
     .setDescription('Issue an infraction to an officer')
     .addUserOption(option =>
@@ -19,7 +20,20 @@ const commands = [
           { name: 'Strike', value: 'Strike' },
           { name: 'Double Warning', value: 'Double Warning' },
           { name: 'Warning', value: 'Warning' },
-          { name: 'Inactivity Strike', value: 'Inactivity Strike' }
+          { name: 'Inactivity Strike', value: 'Inactivity Strike' },
+          { name: 'Blacklist', value: 'Blacklist' }
+        )
+    )
+    .addStringOption(option =>
+      option.setName('subdivision')
+        .setDescription('Leave blank for regular department, or select a subdivision')
+        .setRequired(false)
+        .addChoices(
+          { name: 'SAU', value: 'SAU' },
+          { name: 'Intel', value: 'Intel' },
+          { name: 'CRO', value: 'CRO' },
+          { name: 'Motors', value: 'Motors' },
+          { name: 'FTO', value: 'FTO' }
         )
     )
     .addStringOption(option =>
@@ -31,7 +45,7 @@ const commands = [
         .setDescription('Additional notes')
         .setRequired(false)),
 
-  new SlashCommandBuilder()
+  new SlashCommandBuilder() // HR POLL
     .setName('startpoll')
     .setDescription('Start an HR Poll')
     .addStringOption(option =>
@@ -41,7 +55,38 @@ const commands = [
     .addIntegerOption(option =>
       option.setName('time')
         .setDescription('Duration in hours (24-48)')
+        .setRequired(true)),
+
+  new SlashCommandBuilder() // SAU REQUEST
+    .setName('sau-request')
+    .setDescription('Send an SAU operation request')
+    .addStringOption(option =>
+      option.setName('location')
+        .setDescription('Location of the operation')
         .setRequired(true))
+    .addStringOption(option =>
+      option.setName('time')
+        .setDescription('Time of occurrence')
+        .setRequired(true))
+    .addStringOption(option =>
+      option.setName('case_link')
+        .setDescription('Discord forum case file link')
+        .setRequired(true))
+    .addStringOption(option =>
+      option.setName('operation_type')
+        .setDescription('Type of operation')
+        .setRequired(true)
+        .addChoices(
+          { name: 'Surveillance', value: 'Surveillance' },
+          { name: 'Raid', value: 'Raid' },
+          { name: 'Warrant Execution', value: 'Warrant Execution' },
+          { name: 'Recovery', value: 'Recovery' }
+        )
+    )
+    .addStringOption(option =>
+      option.setName('notes')
+        .setDescription('Additional relevant notes')
+        .setRequired(false))
 
 ].map(command => command.toJSON());
 
