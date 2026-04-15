@@ -25,6 +25,10 @@ const commands = [
         )
     )
     .addStringOption(option =>
+      option.setName('reason')
+        .setDescription('Reason for infraction')
+        .setRequired(true))
+    .addStringOption(option =>
       option.setName('subdivision')
         .setDescription('Leave blank for regular department, or select a subdivision')
         .setRequired(false)
@@ -36,10 +40,6 @@ const commands = [
           { name: 'FTO', value: 'FTO' }
         )
     )
-    .addStringOption(option =>
-      option.setName('reason')
-        .setDescription('Reason for infraction')
-        .setRequired(true))
     .addStringOption(option =>
       option.setName('notes')
         .setDescription('Additional notes')
