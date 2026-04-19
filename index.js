@@ -269,7 +269,6 @@ client.on(Events.InteractionCreate, async interaction => {
   const location = interaction.options.getString('location');
   const time = interaction.options.getInteger('time');
     if (!/^P\d{3,4}$/i.test(location)) {
-    await logAttemptedCommand(interaction, 'Invalid location format');
     return interaction.reply({
      content: 'Location must be in postal code format: P### or P####',
      ephemeral: true
