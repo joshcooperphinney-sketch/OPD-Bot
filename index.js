@@ -17,6 +17,7 @@ const client = new Client({
 
 let caseNumber = 1;
 
+const UNIT_LEADS_ROLE_ID = '1451993975434252438';
 const INTELLIGENCE_DIVISION_ROLE_ID = '1445699831317135461';
 const SAU_ASSIGNMENTS_CHANNEL_ID = '1486788196980490261';
 const DEPT_ADVISOR_ROLE_ID = '1444915293489991815';
@@ -27,6 +28,7 @@ const ACTIONS_CHANNEL_ID = '1443451986056843505';
 const ALLOWED_ROLE_IDS = [
   '1443449344333320232', // Dept. Overseers
   '1444234547452444762', // Internal Affairs
+  '1451993975434252438'     // Unit Leads
 ];
 const INFRACTION_CHANNEL_ID = '1443446307661545513';
 const POLL_ALLOWED_ROLE_IDS = [
@@ -50,7 +52,7 @@ async function logCommand(interaction) {
       .setColor('#112152') 
       .addFields(
         { name: 'User', value: `${interaction.user}`, inline: true },
-        { name: 'Command', value: `/${interaction.commandName}`, inline: true },
+        { name: 'Command', value: `\`/${interaction.commandName}\``, inline: true },
         { name: 'Channel', value: `${interaction.channel}`, inline: true },
         { name: 'Arguments', value: options }
       )
@@ -265,7 +267,14 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 
   const location = interaction.options.getString('location');
-  const time = interaction.options.getString('time');
+  const time = interaction.options.getInteger('time');
+    if (!/^P\d{3,4}$/i.test(location)) {
+    await logAttemptedCommand(interaction, 'Invalid location format');
+    return interaction.reply({
+     content: 'Location must be in postal code format: P### or P####',
+     ephemeral: true
+    });
+   }
   const caseLink = interaction.options.getString('case_link');
   const operationType = interaction.options.getString('operation_type');
   const notes = interaction.options.getString('notes') || 'None';
@@ -275,8 +284,8 @@ client.on(Events.InteractionCreate, async interaction => {
     .setColor('#112152')
     .addFields(
       { name: 'Operation Type', value: operationType, inline: true },
-      { name: 'Location', value: location, inline: true },
-      { name: 'Time of Occurrence', value: time, inline: true },
+      { name: 'Location', value: location.toUpperCase(), inline: true },
+      { name: 'Time of Occurrence', value: `<t:${time}:F>`, inline: true },
       { name: 'Case File', value: `[Open Case File](${caseLink})` },
       { name: 'Additional Notes', value: notes }
     )

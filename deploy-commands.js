@@ -64,10 +64,10 @@ const commands = [
       option.setName('location')
         .setDescription('Location of the operation')
         .setRequired(true))
-    .addStringOption(option =>
+    .addIntegerOption(option =>
       option.setName('time')
-        .setDescription('Time of occurrence')
-        .setRequired(true))
+    .setDescription('Unix timestamp of occurrence')
+    .setRequired(true))
     .addStringOption(option =>
       option.setName('case_link')
         .setDescription('Discord forum case file link')
