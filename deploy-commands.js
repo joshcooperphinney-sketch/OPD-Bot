@@ -36,7 +36,7 @@ const commands = [
           { name: 'SAU', value: 'SAU' },
           { name: 'Intel', value: 'Intel' },
           { name: 'CRO', value: 'CRO' },
-          { name: 'Motors', value: 'Motors' },
+          { name: 'K-9', value: 'K-9' },
           { name: 'FTO', value: 'FTO' }
         )
     )
