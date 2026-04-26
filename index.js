@@ -190,6 +190,25 @@ client.on(Events.InteractionCreate, async interaction => {
       await user.send({ embeds: [embed] });
     } catch {}
 
+    if (type === 'Blacklist') {
+      const blacklistEmbed = new EmbedBuilder()
+        .setTitle('Notice of Blacklist')
+        .setColor('#112152')
+        .setDescription(
+          '**You have been blacklisted from the River City Police Department.**\n\n' +
+          'You are receiving this message at least 24 hours after your termination. This decision has been voted upon by our command team.\n\n' +
+          'Unless you have been banned from the RCPD Discord server, you can locate the blacklist appeal here:\n' +
+          'https://discord.com/channels/1443414638707474545/1443443733042298950\n\n' +
+          'If you have been banned from the RCPD Discord server, you cannot appeal your blacklist.\n\n' +
+          '**~ RCPD Command Team**'
+        )
+        .setTimestamp();
+
+      try {
+        await user.send({ embeds: [blacklistEmbed] });
+      } catch {}
+    }
+
     await interaction.reply({ 
       content: `Infraction issued to ${user.tag}`, 
       ephemeral: true 
@@ -226,7 +245,7 @@ client.on(Events.InteractionCreate, async interaction => {
         { name: 'Topic', value: topic },
         { name: 'Duration', value: `${time} hours`, inline: true },
         { name: 'Ends', value: `<t:${endTime}:F>`, inline: true },
-        { name: 'Options', value: '<:opd_checkmark:1452928682791534756> In Agreement\n<:opd_red_ex:1452928734880596028> Against' }
+        { name: 'Options', value: '<:pd_checkmark:1495612418884370492> In Agreement\n<:pd_red_ex:1495612440031924245> Against' }
       )
       .setFooter({ text: `Started by ${interaction.user.tag}` })
       .setTimestamp();
@@ -243,8 +262,8 @@ client.on(Events.InteractionCreate, async interaction => {
     message.isPoll = true;
 
     // 👍👎 reactions
-    await message.react('<:opd_checkmark:1452928682791534756>');
-    await message.react('<:opd_red_ex:1452928734880596028>');
+    await message.react('<:pd_checkmark:1495612418884370492>');
+    await message.react('<:pd_red_ex:1495612440031924245>');
 
     setTimeout(async () => {
       await closePoll(message);
@@ -313,8 +332,8 @@ async function updatePollEmbed(message) {
     // Only update HR Poll embeds
     if (embed.title !== 'HR Poll') return;
 
-    const upvote = message.reactions.cache.get('1452928682791534756');
-    const downvote = message.reactions.cache.get('1452928734880596028');
+    const upvote = message.reactions.cache.get('1495612418884370492');
+    const downvote = message.reactions.cache.get('1495612440031924245');
 
     const upCount = upvote ? upvote.count - 1 : 0; // subtract bot
     const downCount = downvote ? downvote.count - 1 : 0;
@@ -328,7 +347,7 @@ async function updatePollEmbed(message) {
         embed.fields[2], // Ends
         {
           name: 'Votes',
-          value: `<:opd_checkmark:1452928682791534756> In Agreement: **${upCount}**\n<:opd_red_ex:1452928734880596028> Against: **${downCount}**`
+          value: `<:pd_checkmark:1495612418884370492> In Agreement: **${upCount}**\n<:pd_red_ex:1495612440031924245> Against: **${downCount}**`
         }
       )
       .setFooter({ text: embed.footer.text })
